@@ -887,12 +887,14 @@ type Config struct {
 	ModelPackageName      string
 	ModelFQPN             string
 	AddJSONAnnotation     bool
+	AddFORMAnnotation     bool
 	AddGormAnnotation     bool
 	AddProtobufAnnotation bool
 	AddXMLAnnotation      bool
 	AddDBAnnotation       bool
 	UseGureguTypes        bool
 	JSONNameFormat        string
+	FORMNameFormat        string
 	XMLNameFormat         string
 	ProtobufNameFormat    string
 	DaoPackageName        string
@@ -965,6 +967,7 @@ func NewConfig(templateLoader TemplateLoader) *Config {
 	conf.AddDBAnnotation = true
 	conf.UseGureguTypes = false
 	conf.JSONNameFormat = "snake"
+	conf.FORMNameFormat = "snake"
 	conf.XMLNameFormat = "snake"
 	conf.ProtobufNameFormat = "snake"
 	conf.Verbose = false

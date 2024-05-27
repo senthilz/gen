@@ -14,13 +14,14 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 go.sum
 .idea/
 #packrd/
 #main-packr.go
 gen
+
 #
 # only store sample db in git
 #

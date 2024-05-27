@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"go/build"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -56,6 +55,9 @@ var (
 
 	addJSONAnnotation = goopt.Flag([]string{"--json"}, []string{"--no-json"}, "Add json annotations (default)", "Disable json annotations")
 	jsonNameFormat    = goopt.String([]string{"--json-fmt"}, "snake", "json name format [snake | camel | lower_camel | none]")
+
+	addFORMAnnotation = goopt.Flag([]string{"--form"}, []string{"--no-form"}, "Add form annotations (default)", "Disable form annotations")
+	formNameFormat    = goopt.String([]string{"--form-fmt"}, "snake", "form name format [snake | camel | lower_camel | none]")
 
 	addXMLAnnotation = goopt.Flag([]string{"--xml"}, []string{"--no-xml"}, "Add xml annotations (default)", "Disable xml annotations")
 	xmlNameFormat    = goopt.String([]string{"--xml-fmt"}, "snake", "xml name format [snake | camel | lower_camel | none]")
@@ -276,7 +278,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Generating code for the following tables (%d)\n", len(tableInfos))
+	fmt.Printf("::::Generating code for the following tables (%d)\n", len(tableInfos))
 	i := 0
 	for tableName := range tableInfos {
 		fmt.Printf("[%d] %s\n", i, tableName)
@@ -350,6 +352,7 @@ func initialize(conf *dbmeta.Config) {
 	conf.SQLDatabase = *sqlDatabase
 
 	conf.AddJSONAnnotation = *addJSONAnnotation
+	conf.AddFORMAnnotation = *addFORMAnnotation
 	conf.AddXMLAnnotation = *addXMLAnnotation
 	conf.AddGormAnnotation = *addGormAnnotation
 	conf.AddProtobufAnnotation = *addProtobufAnnotation
@@ -423,7 +426,7 @@ func loadDefaultDBMappings(conf *dbmeta.Config) error {
 func executeCustomScript(conf *dbmeta.Config) error {
 	fmt.Printf("Executing script %s\n", *execCustomScript)
 
-	b, err := ioutil.ReadFile(*execCustomScript)
+	b, err := os.ReadFile(*execCustomScript)
 	if err != nil {
 		fmt.Printf("Error Loading exec script: %s, error: %v\n", *execCustomScript, err)
 		return err
@@ -639,6 +642,7 @@ func generate(conf *dbmeta.Config) error {
 	}
 
 	if *modGenerate {
+		fmt.Println("modGenerate ::::")
 		err = conf.WriteTemplate(GoModuleTmpl, data, filepath.Join(*outDir, "go.mod"))
 		if err != nil {
 			fmt.Print(au.Red(fmt.Sprintf("Error writing file: %v\n", err)))
@@ -993,38 +997,43 @@ func regenCmdLine() []string {
 	cmdLine = append(cmdLine, fmt.Sprintf(" --api=%s", *apiPackageName))
 	cmdLine = append(cmdLine, fmt.Sprintf(" --out=%s", "./"))
 	cmdLine = append(cmdLine, fmt.Sprintf(" --module=%s", *module))
+
 	if *addJSONAnnotation {
-		cmdLine = append(cmdLine, fmt.Sprintf(" --json"))
+		cmdLine = append(cmdLine, " --form")
+		cmdLine = append(cmdLine, fmt.Sprintf(" --form-fmt=%s", *formNameFormat))
+	}
+	if *addJSONAnnotation {
+		cmdLine = append(cmdLine, " --json")
 		cmdLine = append(cmdLine, fmt.Sprintf(" --json-fmt=%s", *jsonNameFormat))
 	}
 	if *addXMLAnnotation {
-		cmdLine = append(cmdLine, fmt.Sprintf(" --xml"))
+		cmdLine = append(cmdLine, " --xml")
 		cmdLine = append(cmdLine, fmt.Sprintf(" --xml-fmt=%s", *xmlNameFormat))
 	}
 	if *addGormAnnotation {
-		cmdLine = append(cmdLine, fmt.Sprintf(" --gorm"))
+		cmdLine = append(cmdLine, " --gorm")
 	}
 	if *addProtobufAnnotation {
-		cmdLine = append(cmdLine, fmt.Sprintf(" --protobuf"))
+		cmdLine = append(cmdLine, " --protobuf")
 		cmdLine = append(cmdLine, fmt.Sprintf(" --proto-fmt=%s", *protoNameFormat))
 	}
 	if *addDBAnnotation {
-		cmdLine = append(cmdLine, fmt.Sprintf(" --db"))
+		cmdLine = append(cmdLine, " --db")
 	}
 	if *useGureguTypes {
-		cmdLine = append(cmdLine, fmt.Sprintf(" --guregu"))
+		cmdLine = append(cmdLine, " --guregu")
 	}
 	if *modGenerate {
-		cmdLine = append(cmdLine, fmt.Sprintf(" --mod"))
+		cmdLine = append(cmdLine, " --mod")
 	}
 	if *makefileGenerate {
-		cmdLine = append(cmdLine, fmt.Sprintf(" --makefile"))
+		cmdLine = append(cmdLine, " --makefile")
 	}
 	if *serverGenerate {
-		cmdLine = append(cmdLine, fmt.Sprintf(" --server"))
+		cmdLine = append(cmdLine, " --server")
 	}
 	if *overwrite {
-		cmdLine = append(cmdLine, fmt.Sprintf(" --overwrite"))
+		cmdLine = append(cmdLine, " --overwrite")
 	}
 
 	if *contextFileName != "" {
@@ -1142,7 +1151,7 @@ func LoadTemplate(filename string) (tpl *dbmeta.GenTemplate, err error) {
 	if *templateDir != "" {
 		fpath := filepath.Join(*templateDir, filename)
 		var b []byte
-		b, err = ioutil.ReadFile(fpath)
+		b, err = os.ReadFile(fpath)
 		if err == nil {
 
 			absPath, err := filepath.Abs(fpath)

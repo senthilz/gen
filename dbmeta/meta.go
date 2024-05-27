@@ -295,6 +295,7 @@ type FieldInfo struct {
 	SQLMapping            *SQLMapping
 	GormAnnotation        string
 	JSONAnnotation        string
+	FORMAnnotation        string
 	XMLAnnotation         string
 	DBAnnotation          string
 	GoGoMoreTags          string
@@ -342,12 +343,17 @@ func (c *Config) GenerateFieldsTypes(dbMeta DbTableMeta) ([]*FieldInfo, error) {
 
 		fi.GormAnnotation = createGormAnnotation(col)
 		fi.JSONAnnotation = createJSONAnnotation(c.JSONNameFormat, col)
+		fi.FORMAnnotation = createFORMAnnotation(c.JSONNameFormat, col)
 		fi.XMLAnnotation = createXMLAnnotation(c.XMLNameFormat, col)
 		fi.DBAnnotation = createDBAnnotation(col)
 
 		var annotations []string
 		if c.AddGormAnnotation {
 			annotations = append(annotations, fi.GormAnnotation)
+		}
+
+		if c.AddFORMAnnotation {
+			annotations = append(annotations, fi.FORMAnnotation)
 		}
 
 		if c.AddJSONAnnotation {
@@ -448,6 +454,11 @@ func formatFieldName(nameFormat string, name string) string {
 		jsonName = name
 	}
 	return jsonName
+}
+
+func createFORMAnnotation(nameFormat string, c ColumnMeta) string {
+	name := formatFieldName(nameFormat, c.Name())
+	return fmt.Sprintf("form:\"%s\"", name)
 }
 
 func createJSONAnnotation(nameFormat string, c ColumnMeta) string {
@@ -697,7 +708,7 @@ func LoadTableInfo(db *sql.DB, dbTables []string, excludeDbTables []string, conf
 			if au != nil {
 				fmt.Print(au.Yellow(msg))
 			} else {
-				fmt.Printf(msg)
+				fmt.Println(msg)
 			}
 
 			continue
@@ -709,7 +720,7 @@ func LoadTableInfo(db *sql.DB, dbTables []string, excludeDbTables []string, conf
 			if au != nil {
 				fmt.Print(au.Red(msg))
 			} else {
-				fmt.Printf(msg)
+				fmt.Println(msg)
 			}
 
 			continue
