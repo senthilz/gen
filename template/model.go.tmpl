@@ -2,56 +2,8 @@ package {{.modelPackageName}}
 
 import (
     "database/sql"
-    "time"
 
-    "github.com/google/uuid"
-    {{if .UseGuregu}} "github.com/guregu/null" {{end}}
-	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
-
-var (
-	_ = datatypes.JSON{}
-)
-
-/*
-DB Table Details
--------------------------------------
-{{ $ddl := .TableInfo.DBMeta.DDL }}
-{{if $ddl }}
-{{$ddl}}
-{{- end}}
-
-JSON Sample
--------------------------------------
-{{ToJSON .TableInfo.Instance 4}}
-
-{{if .TableInfo.Notes }}
-Comments
--------------------------------------
-{{ .TableInfo.Notes}}
-{{end}}
-
-*/
-
- {{if not .Config.AddProtobufAnnotation }}
-
-// {{.StructName}} struct is a row record of the {{.TableName}} table in the {{.DatabaseName}} database
-type {{.StructName}} struct {
-    {{range .TableInfo.Fields}}{{.}}
-    {{end}}
-}
-{{else}}
-
-// {{.StructName}} struct is a row record of the {{.TableName}} table in the {{.DatabaseName}} database
-/*
-type {{.StructName}} struct {
-    {{range .TableInfo.Fields}}{{.}}
-    {{end}}
-}
-*/
-
-{{end}}
 
 var {{.TableName}}TableInfo = &TableInfo {
 	Name: "{{.TableName}}",
@@ -79,13 +31,6 @@ var {{.TableName}}TableInfo = &TableInfo {
         },
         {{end}}
 	},
-}
-
-
-
-// TableName sets the insert table name for this struct type
-func ({{.ShortStructName}} *{{.StructName}}) TableName() string {
-	return "{{.TableName}}"
 }
 
 // BeforeSave invoked before saving, return an error if field is not populated.

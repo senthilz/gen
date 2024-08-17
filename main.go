@@ -13,13 +13,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/droundy/goopt"
 	"github.com/gobuffalo/packd"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/jimsmart/schema"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	_ "github.com/lib/pq"
 	"github.com/logrusorgru/aurora"
 	_ "github.com/mattn/go-sqlite3"
 
@@ -216,6 +214,7 @@ func main() {
 
 	var dbTables []string
 	// parse or read tables
+	fmt.Printf("sqlTable = %+v\n", sqlTable)
 	if *sqlTable != "" {
 		dbTables = strings.Split(*sqlTable, ",")
 	} else {
